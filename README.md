@@ -111,7 +111,20 @@ GitHub Pages serves `docs/` from the `main` branch. No build step is needed.
 **Tools:** Claude Code (Claude Opus 5.5 model) in the terminal as an agent. It wrote the pipeline and the site,
 ran the training, and checked the page in a headless browser (Playwright MCP). PyCharm was the editor.
 
-**Key prompt:** the assignment text plus "implement it, make the commit clean, test it yourself".
+**Key prompts, in order:**
+
+1. **Build it.** I pasted the full assignment text (task #26 plus the common requirements) and asked the agent to
+   implement it, keep the commit history clean, and test the result itself.
+2. **Settle open decisions first.** I told the agent to ask its questions up front. I chose:
+   - GitHub Pages for deployment,
+   - letting the agent create the public repo and push it,
+   - `main` as the branch name.
+3. **Check completeness.** I asked whether everything was done. The agent listed what was left for me: claim the
+   task, personalise this section, hand in on Moodle, and the optional video.
+4. **Easier start.** I asked for a Makefile. It gives `make serve`, `make train`, `make test` and `make all`.
+5. **Clean authorship.** I asked to remove the Claude co-author lines from the commits. The history was rewritten
+   and force-pushed.
+6. **Documentation.** I asked for this section to describe what I did, structured more clearly.
 
 **What did not work at first and had to be fixed:**
 
