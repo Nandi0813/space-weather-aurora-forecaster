@@ -71,18 +71,6 @@ Effect of the storm weighting on Ridge (same test set):
 | none | 0.79 | 1.60 | 0.44 | 0.54 |
 | `exp(Kp/2)` | 0.84 | 1.39 | 0.54 | 0.57 |
 
-**How to defend it in one minute:**
-
-- Persistence is a hard baseline at a 3-hour horizon. The models beat it overall, by about 6% RMSE, and on the
-  false-alarm ratio.
-- The solar wind adds information mainly at storm *onset*. At onset, persistence is always one bin late.
-- During the main phase of a storm, persistence is as good as or better than the models. On the May 2024 storm
-  the RMSE is 1.25 for persistence and 1.30 for Ridge. Kp is a 3-hour aggregate, and L1 gives only ~30–60 minutes of
-  warning, so a 3-hour forecast is mostly "current state + drivers".
-- Weighting trades quiet-time accuracy for storm accuracy. That is the right trade for an aurora forecaster.
-- The linear model saturates: it cannot extrapolate beyond the extreme drivers seen in training. The prediction is
-  clipped to `[0, 9]`.
-
 ## Usage
 
 Requires [uv](https://docs.astral.sh/uv/).
