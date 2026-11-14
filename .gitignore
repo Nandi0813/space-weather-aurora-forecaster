@@ -1,0 +1,7 @@
+data/
+__pycache__/
+.pytest_cache/
+.venv/
+.idea/
+.playwright-mcp/
+.DS_Store

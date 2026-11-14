@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aurora Forecaster CE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha384-c6Rcwz4e4CITMbu/NBmnNS8yN2sC3cUElMEMfP3vqqKFp7GOYaaBBCqmaWBjmkjb" crossorigin="anonymous">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #111110; --surface: #1a1a19; --border: #2e2e2c;
+    --text: #f0efec; --text-2: #c3c2b7; --muted: #8d8c85;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --good: #0ca30c; --warn: #c98500; --crit: #e66767;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.5rem; margin: 8px 0 0; }
+  h2 { font-size: 1.1rem; margin: 0 0 8px; }
+  p.sub { color: var(--text-2); margin: 4px 0 16px; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .tile { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .tile .label { color: var(--muted); font-size: .8rem; }
+  .tile .value { font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+  .tile .unit { color: var(--text-2); font-size: .85rem; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .chart { position: relative; height: 220px; }
+  #map { height: 420px; border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: .9rem; }
+  th, td { text-align: right; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+  th:first-child, td:first-child { text-align: left; }
+  .scroll { overflow-x: auto; }
+  .note { color: var(--muted); font-size: .85rem; }
+  select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font: inherit; }
+  .err { color: var(--crit); }
+  a { color: var(--s1); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Space weather &amp; aurora forecaster — Central Europe</h1>
+  <p class="sub">Live NOAA SWPC data, a Kp forecaster trained on 2010–2022 and back-tested on 2023–2025 storms.</p>
+
+  <section>
+    <h2>Now</h2>
+    <div class="tiles" id="tiles"><div class="note">Loading live data…</div></div>
+    <p class="note" id="verdict"></p>
+  </section>
+
+  <section>
+    <h2>Solar wind at L1 (last 24 h, 1-min)</h2>
+    <div class="grid2">
+      <div><div class="note">Speed (km/s)</div><div class="chart"><canvas id="cSpeed"></canvas></div></div>
+      <div><div class="note">IMF Bz GSM (nT) — southward (&lt;0) drives storms</div><div class="chart"><canvas id="cBz"></canvas></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kp index — observed and NOAA forecast</h2>
+    <div class="chart"><canvas id="cKp"></canvas></div>
+    <p class="note">G1 storm at Kp 5, G3 at 7, G5 at 9. Faded bars are NOAA SWPC's own forecast.</p>
+  </section>
+
+  <section>
+    <h2>Aurora probability (NOAA OVATION model)</h2>
+    <div id="map"></div>
+    <p class="note" id="mapnote"></p>
+  </section>
+
+  <section>
+    <h2>Back-test on past geomagnetic storms</h2>
+    <p class="note">Forecast target: Kp of the next 3-hour bin, from the solar wind of the previous 3 hours and the last Kp. Models were trained on 2010–2022 only; all storms below are out-of-sample.</p>
+    <label>Storm <select id="storm"></select></label>
+    <div class="chart" style="height:300px;margin-top:8px"><canvas id="cStorm"></canvas></div>
+    <div class="scroll"><table id="tStorm"></table></div>
+    <h2 style="margin-top:16px">Whole test period 2023–2025</h2>
+    <div class="scroll"><table id="tAll"></table></div>
+    <p class="note">RMSE in Kp units. Storm = Kp ≥ 5. POD = share of storm bins forecast as storm, FAR = share of storm forecasts that were false alarms, HSS = Heidke skill score (0 = chance, 1 = perfect).</p>
+  </section>
+
+  <p class="note">Data: <a href="https://services.swpc.noaa.gov">NOAA SWPC</a>, <a href="https://kp.gfz.de">GFZ Potsdam Kp</a> (CC BY 4.0), <a href="https://omniweb.gsfc.nasa.gov">NASA OMNI</a>. Not an official forecast.</p>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha384-NElt3Op+9NBMCYaef5HxeJmU4Xeard/Lku8ek6hoPTvYkQPh3zLIrJP7KiRocsxO" crossorigin="anonymous"></script>
+<script src="app.js"></script>
+</body>
+</html>
