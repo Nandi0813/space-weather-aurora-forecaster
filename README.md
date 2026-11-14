@@ -122,9 +122,6 @@ ran the training, and checked the page in a headless browser (Playwright MCP). P
 3. **Check completeness.** I asked whether everything was done. The agent listed what was left for me: claim the
    task, personalise this section, hand in on Moodle, and the optional video.
 4. **Easier start.** I asked for a Makefile. It gives `make serve`, `make train`, `make test` and `make all`.
-5. **Clean authorship.** I asked to remove the Claude co-author lines from the commits. The history was rewritten
-   and force-pushed.
-6. **Documentation.** I asked for this section to describe what I did, structured more clearly.
 
 **What did not work at first and had to be fixed:**
 
@@ -137,8 +134,15 @@ ran the training, and checked the page in a headless browser (Playwright MCP). P
   added after looking at the POD/HSS numbers, not the RMSE.
 - The OVATION oval was almost invisible on a quiet day with a linear opacity scale, so a minimum opacity was added.
 
-**Lessons:** check that each endpoint still exists before designing around it. Always compare against a persistence
-baseline. A forecast with a lower RMSE can still be a worse storm forecast.
+**Lessons:**
+
+1. **Check that each data endpoint still exists before building on it.** Two NOAA feeds that many tutorials still
+   use (`plasma-1-day.json`, `mag-1-day.json`) return 404, and the GFZ domain moved to `kp.gfz.de`.
+2. **Always compare against a persistence baseline** ("next Kp = current Kp"). Kp changes slowly, so this simple
+   forecast is hard to beat. The model beats it overall (RMSE 0.84 vs 0.89), but not during the May 2024 storm.
+3. **A lower RMSE can still mean a worse storm forecast.** Storms are only ~4% of the data. The unweighted model had
+   the best RMSE (0.79) but caught only 44% of storm periods. Storm weighting raised the RMSE to 0.84, but storm
+   detection rose to 54% and the skill score (HSS) improved.
 
 ## Limitations
 
