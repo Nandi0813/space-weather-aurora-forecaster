@@ -88,11 +88,14 @@ Effect of the storm weighting on Ridge (same test set):
 Requires [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync
-uv run python train.py      # downloads ~45 MB into data/, trains, writes docs/model.json + docs/backtest.json
-uv run pytest -q            # unit tests: Newell function, no-leakage feature windows, metrics
-cd docs && python -m http.server 8000   # open http://localhost:8000
+make serve    # just view the dashboard at http://localhost:8000 (model files are committed)
+make train    # uv sync + download ~45 MB into data/, train, write docs/model.json + docs/backtest.json
+make test     # unit tests: Newell function, no-leakage feature windows, metrics
+make all      # train, test, then serve
+make help     # list targets
 ```
+
+Without `make`: `uv sync`, `uv run python train.py`, `uv run pytest -q`, `cd docs && python -m http.server 8000`.
 
 GitHub Pages serves `docs/` from the `main` branch. No build step is needed.
 
